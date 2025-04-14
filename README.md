@@ -10,8 +10,13 @@ npm install
 
 ## Create a .env file in your backend directory
 SNOWFLAKE_USER=
+
 SNOWFLAKE_PASSWORD=
+
 SNOWFLAKE_ACCOUNT=
+
 SNOWFLAKE_WAREHOUSE=
+
 SNOWFLAKE_DATABASE=
+
 SNOWFLAKE_SCHEMA=
