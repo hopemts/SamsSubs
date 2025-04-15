@@ -58,17 +58,25 @@ function Login() {
         phone_number: phoneNumber
       });
       
-      // Store user data in localStorage
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const userData = response.data.user;
+      if (!userData || !userData.customer_key) {
+        throw new Error('Invalid response format: missing customer key');
+      }
       
-      // Redirect to sandwich details page
-      navigate(`/sandwich-details/${response.data.user.id}`);
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Redirect to sandwich report page with customer key
+      navigate(`/sandwich-report/${userData.customer_key}`);
     } catch (error) {
       if (error.response?.status === 404) {
         setError('Phone number not found in our records. Please check and try again.');
+      } else if (error.message === 'Invalid response format: missing customer key') {
+        setError('Server response format error. Please try again.');
       } else {
         setError(getErrorMessage(error));
       }
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }

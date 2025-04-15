@@ -51,7 +51,10 @@ def login(request):
                 'first_name': result[1],
                 'last_name': result[2]
             }
-            return Response({'message': 'Login successful', 'user': user_data}, status=200)
+            return Response({
+                'message': 'Login successful',
+                'user': user_data
+            }, status=200)
         else:
             # If the phone number is not found, return a message
             return Response({'message': 'Phone number not found in records'}, status=404)
@@ -422,3 +425,216 @@ def inspect_tables(request):
             'message': f'Error inspecting tables: {str(e)}',
             'error_details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def get_customer_favorite_sandwich(request, customer_key):
+    try:
+        # Connect to Snowflake
+        conn = snowflake.connector.connect(
+            user=os.getenv('SNOWFLAKE_USER'),
+            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            account=os.getenv('SNOWFLAKE_ACCOUNT'),
+            warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
+            database=os.getenv('SNOWFLAKE_DATABASE'),
+            schema=os.getenv('SNOWFLAKE_SCHEMA')
+        )
+        
+        cursor = conn.cursor()
+        
+        # Query to get the most ordered sandwich for the customer
+        query = """
+        WITH OrderCounts AS (
+            SELECT 
+                f.CUSTOMERKEY,
+                f.PRODUCTKEY,
+                p.PRODUCTNAME,
+                SUM(f.QUANTITY) as total_ordered,
+                ROW_NUMBER() OVER (PARTITION BY f.CUSTOMERKEY ORDER BY SUM(f.QUANTITY) DESC) as rank
+            FROM FACT_ORDERPROCESSING f
+            JOIN PRODUCT_DIM p ON f.PRODUCTKEY = p.PRODUCTKEY
+            WHERE f.CUSTOMERKEY = %s
+            GROUP BY f.CUSTOMERKEY, f.PRODUCTKEY, p.PRODUCTNAME
+        )
+        SELECT 
+            PRODUCTNAME,
+            total_ordered
+        FROM OrderCounts
+        WHERE rank = 1
+        """
+        
+        cursor.execute(query, (customer_key,))
+        result = cursor.fetchone()
+        
+        if result:
+            favorite_sandwich = {
+                'product_name': result[0],
+                'total_ordered': result[1]
+            }
+            return Response(favorite_sandwich, status=200)
+        else:
+            return Response({'message': 'No orders found for this customer'}, status=404)
+            
+    except Exception as e:
+        return Response({'message': f'Error retrieving favorite sandwich: {str(e)}'}, status=500)
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+@api_view(['GET'])
+def get_customer_sandwich_report(request, customer_key):
+    try:
+        conn = snowflake.connector.connect(
+            user=os.getenv('SNOWFLAKE_USER'),
+            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            account=os.getenv('SNOWFLAKE_ACCOUNT'),
+            warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
+            database=os.getenv('SNOWFLAKE_DATABASE'),
+            schema=os.getenv('SNOWFLAKE_SCHEMA')
+        )
+        
+        cursor = conn.cursor()
+        
+        # 1. Favorite Sandwich (Most Ordered)
+        favorite_query = """
+        WITH OrderCounts AS (
+            SELECT 
+                f.PRODUCTKEY,
+                p.PRODUCTNAME,
+                p.PRODUCTCALORIES,
+                SUM(f.QUANTITY) as total_ordered,
+                ROW_NUMBER() OVER (PARTITION BY f.CUSTOMERKEY ORDER BY SUM(f.QUANTITY) DESC) as rank
+            FROM FACT_ORDERPROCESSING f
+            JOIN PRODUCT_DIM p ON f.PRODUCTKEY = p.PRODUCTKEY
+            WHERE f.CUSTOMERKEY = %s
+            GROUP BY f.CUSTOMERKEY, f.PRODUCTKEY, p.PRODUCTNAME, p.PRODUCTCALORIES
+        )
+        SELECT 
+            PRODUCTNAME,
+            PRODUCTCALORIES,
+            total_ordered
+        FROM OrderCounts
+        WHERE rank = 1
+        """
+        
+        # 2. Total Sandwiches Ordered
+        total_query = """
+        SELECT 
+            COUNT(DISTINCT f.DATEKEY) as unique_days,
+            SUM(f.QUANTITY) as total_sandwiches,
+            SUM(f.QUANTITY * f.PRICE_EACH) as total_spent
+        FROM FACT_ORDERPROCESSING f
+        WHERE f.CUSTOMERKEY = %s
+        """
+        
+        # 3. Favorite Order Method
+        method_query = """
+        WITH MethodCounts AS (
+            SELECT 
+                m.ORDERMETHOD,
+                COUNT(*) as method_count,
+                ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rank
+            FROM FACT_ORDERPROCESSING f
+            JOIN ORDERMETHOD_DIM m ON f.METHODKEY = m.METHODKEY
+            WHERE f.CUSTOMERKEY = %s
+            GROUP BY m.ORDERMETHOD
+        )
+        SELECT 
+            ORDERMETHOD,
+            method_count
+        FROM MethodCounts
+        WHERE rank = 1
+        """
+        
+        # 4. Most Common Store
+        store_query = """
+        WITH StoreCounts AS (
+            SELECT 
+                s.CITY,
+                s.ADDRESS,
+                COUNT(*) as visit_count,
+                ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) as rank
+            FROM FACT_ORDERPROCESSING f
+            JOIN STORE_DIM s ON f.STOREKEY = s.STOREKEY
+            WHERE f.CUSTOMERKEY = %s
+            GROUP BY s.CITY, s.ADDRESS
+        )
+        SELECT 
+            CITY,
+            ADDRESS,
+            visit_count
+        FROM StoreCounts
+        WHERE rank = 1
+        """
+        
+        # 5. Order History Timeline
+        timeline_query = """
+        SELECT 
+            d.MONTH_NAME,
+            d.YEAR_NUMBER,
+            d.MONTH_OF_YEAR,
+            SUM(f.QUANTITY) as sandwiches_that_month
+        FROM FACT_ORDERPROCESSING f
+        JOIN DATE_DIM d ON f.DATEKEY = d.DATEKEY
+        WHERE f.CUSTOMERKEY = %s
+        GROUP BY d.MONTH_NAME, d.YEAR_NUMBER, d.MONTH_OF_YEAR
+        ORDER BY d.YEAR_NUMBER DESC, d.MONTH_OF_YEAR DESC
+        LIMIT 6
+        """
+        
+        # Execute all queries
+        cursor.execute(favorite_query, (customer_key,))
+        favorite_result = cursor.fetchone()
+        
+        cursor.execute(total_query, (customer_key,))
+        total_result = cursor.fetchone()
+        
+        cursor.execute(method_query, (customer_key,))
+        method_result = cursor.fetchone()
+        
+        cursor.execute(store_query, (customer_key,))
+        store_result = cursor.fetchone()
+        
+        cursor.execute(timeline_query, (customer_key,))
+        timeline_results = cursor.fetchall()
+        
+        if not favorite_result:
+            return Response({'message': 'No orders found for this customer'}, status=404)
+            
+        # Compile the report
+        report = {
+            'favorite_sandwich': {
+                'name': favorite_result[0],
+                'calories': favorite_result[1],
+                'times_ordered': favorite_result[2]
+            },
+            'order_stats': {
+                'unique_days_ordered': total_result[0],
+                'total_sandwiches': total_result[1],
+                'total_spent': float(total_result[2]) if total_result[2] else 0
+            },
+            'preferred_ordering': {
+                'method': method_result[0] if method_result else None,
+                'times_used': method_result[1] if method_result else 0
+            },
+            'favorite_location': {
+                'city': store_result[0] if store_result else None,
+                'address': store_result[1] if store_result else None,
+                'visits': store_result[2] if store_result else 0
+            },
+            'order_timeline': [
+                {
+                    'month': result[0],
+                    'year': result[1],
+                    'sandwiches': result[3]
+                }
+                for result in timeline_results
+            ]
+        }
+        
+        return Response(report, status=200)
+            
+    except Exception as e:
+        return Response({'message': f'Error generating sandwich report: {str(e)}'}, status=500)
+    finally:
+        if 'conn' in locals():
+            conn.close()
