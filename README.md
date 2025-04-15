@@ -20,3 +20,9 @@ SNOWFLAKE_WAREHOUSE=
 SNOWFLAKE_DATABASE=
 
 SNOWFLAKE_SCHEMA=
+
+## Start the backend
+python manage.py runserver
+
+## Start the frontend
+npm start
