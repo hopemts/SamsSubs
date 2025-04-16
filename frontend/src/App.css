@@ -1,3 +1,16 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
 .App {
   text-align: center;
   min-height: 100vh;
@@ -175,25 +188,35 @@ button:hover {
   font-weight: 800;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
-  display: inline-block;
-  padding-right: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-left: 50%;
   transform: translateX(-50%);
 }
 
-.sandwich-report h2::after {
-  content: '🥪';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 2rem;
-  animation: bounce 2s infinite;
+.sandwich-report h2 .greeting {
+  margin-bottom: 0.5rem;
+  font-family: 'Pacifico', cursive;
+  font-size: 3rem;
+  color: #4A90E2;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  50% { transform: translateY(-50%) scale(1.1); }
+.sandwich-report h2 .title {
+  white-space: nowrap;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  background: linear-gradient(45deg, #FF6B6B, #FFB74D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+/* Remove the sandwich icon and its animation */
+.sandwich-report h2::after {
+  display: none;
 }
 
 .report-section {
@@ -245,11 +268,41 @@ button:hover {
   border-radius: 12px 12px 0 0;
 }
 
-.favorite-sandwich h4 {
+.section-content h4 {
   color: #FF6B6B;
   font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   font-weight: 800;
+}
+
+.section-content p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0.8rem 0;
+  line-height: 1.5;
+}
+
+/* Remove any section-specific styles that might override the base styles */
+.favorite-sandwich h4,
+.favorite-side h4,
+.order-stats h4,
+.preferred-ordering h4,
+.favorite-location h4 {
+  color: #FF6B6B;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 800;
+}
+
+.favorite-sandwich p,
+.favorite-side p,
+.order-stats p,
+.preferred-ordering p,
+.favorite-location p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0.8rem 0;
+  line-height: 1.5;
 }
 
 .timeline {

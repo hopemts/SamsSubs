@@ -62,8 +62,22 @@ function SandwichReport() {
 
   return (
     <div className="sandwich-report">
-      <h2>Your Sandwich Unwrapped</h2>
+      <h2>
+        <div className="greeting">Hey, {report.customer_first_name}!</div>
+        <div className="title">Here is your 2023</div>
+        <div className="title">Sandwich Unwrapped</div>
+
+      </h2>
       
+      {/* Order Stats Section */}
+      <div className="report-section order-stats">
+        <h3>Your Sandwich Journey</h3>
+        <div className="section-content">
+          <p>Total sandwiches enjoyed: {report.order_stats.total_sandwiches}</p>
+          <p>Total investment in happiness: ${report.order_stats.total_spent.toFixed(2)}</p>
+        </div>
+      </div>
+
       {/* Favorite Sandwich Section */}
       <div className="report-section favorite-sandwich">
         <h3>Your Favorite Sandwich</h3>
@@ -74,13 +88,13 @@ function SandwichReport() {
         </div>
       </div>
 
-      {/* Order Stats Section */}
-      <div className="report-section order-stats">
-        <h3>Your Sandwich Journey</h3>
+      {/* Favorite Side Section */}
+      <div className="report-section favorite-side">
+        <h3>Your Favorite Side</h3>
         <div className="section-content">
-          <p>You've ordered on {report.order_stats.unique_days_ordered} different days</p>
-          <p>Total sandwiches enjoyed: {report.order_stats.total_sandwiches}</p>
-          <p>Total investment in happiness: ${report.order_stats.total_spent.toFixed(2)}</p>
+          <h4>{report.favorite_side.name}</h4>
+          <p>You've ordered this {report.favorite_side.times_ordered} times!</p>
+          <p>Calories per side: {report.favorite_side.calories}</p>
         </div>
       </div>
 
@@ -100,19 +114,6 @@ function SandwichReport() {
           <p>Most visited location: {report.favorite_location.address}</p>
           <p>In {report.favorite_location.city}</p>
           <p>You've visited this location {report.favorite_location.visits} times</p>
-        </div>
-      </div>
-
-      {/* Order Timeline Section */}
-      <div className="report-section order-timeline">
-        <h3>Your Recent Sandwich History</h3>
-        <div className="section-content timeline">
-          {report.order_timeline.map((period, index) => (
-            <div key={index} className="timeline-entry">
-              <h4>{period.month} {period.year}</h4>
-              <p>{period.sandwiches} sandwiches</p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
