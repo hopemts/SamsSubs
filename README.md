@@ -87,12 +87,6 @@ This application pulls personalized data for each customer from Snowflake and vi
 - Your favorite order method
 - Your favorite location
 
-### 💡 Strategic Recommendations
-We provided a data strategy improvement plan to:
-- Enhance the granularity and quality of data collected
-- Enable deeper, more actionable customer insights
-- Support scalable visualization and reporting
-
 ### 📊 Dashboard Mock-Up
 Our dashboard prototype demonstrates how improved data quality and structure can power a more insightful and engaging customer experience.
 
@@ -103,5 +97,33 @@ All code for this deliverable is located in the **Final Deliverable** folder of 
 - Customer-facing dashboard
 ![FF205561-A6A6-40F3-B5CC-D0342D7242A1_1_201_a](https://github.com/user-attachments/assets/71c42cc9-3781-41f1-9d36-ce33ed86616a)
 
+
+### 💡 Strategic Recommendations
+
+#### 🔄 Recommendation: Add a `TIME_OF_DAY` column to the `DATE_DIM` table
+
+##### 📊 What the dashboard could show:
+A bar chart that shows **sales by time of day for each day of the week**.
+
+**Example**:  
+- Most sales happen during **Lunch** on weekdays  
+- **Evening** is more popular on weekends  
+
+**Suggested time buckets**:
+- Early Morning (6–9 AM)  
+- Mid Morning (9–11 AM)  
+- Lunch (11 AM–2 PM)  
+- Afternoon (2–5 PM)  
+- Evening (5–8 PM)  
+- Late Night (8 PM–Close)
+
+##### ✅ Why this helps:
+- Shows **when** customers buy the most  
+- Helps with **staffing and scheduling**  
+- Enables **time-based promotions** like “Afternoon Special”
+
+##### 📌 Why it matters:
+Right now, Sam’s Subs only sees **what day** people buy — not **what time**.  
+Adding this small change gives the team **better data** to make **smarter decisions**.
 
 ---
