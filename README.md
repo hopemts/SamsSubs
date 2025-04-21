@@ -102,6 +102,8 @@ All code for this deliverable is located in the **Final Deliverable** folder of 
 
 #### 🔄 Recommendation: Add a `TIME_OF_DAY` column to the `DATE_DIM` table
 
+![E9C5195B-EE49-4864-83A1-6374D328E8F7](https://github.com/user-attachments/assets/51c83a1e-8c8f-476d-800d-c64ea087c5b7)
+
 ##### 📊 What the dashboard could show:
 A bar chart that shows **sales by time of day for each day of the week**.
 
