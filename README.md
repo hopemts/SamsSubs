@@ -61,7 +61,7 @@ Throughout the project, we:
 - Created surrogate keys using `dbt_utils.generate_surrogate_key`
 - Wrote 3 business questions and queries based on the dimensional model
 
-📸 *Screenshots:*
+
 - Snowflake schema view
 ![72EA0F05-2FFE-4E83-B89A-8A272BA19943_1_201_a](https://github.com/user-attachments/assets/03b86882-9247-4641-9678-8608bd4a26b3)
 
@@ -102,7 +102,7 @@ All code for this deliverable is located in the **Final Deliverable** folder of 
 
 ## 📸 Screenshots Included
 - Customer-facing dashboard
-![FF205561-A6A6-40F3-B5CC-D0342D7242A1](https://github.com/user-attachments/assets/a7e1b7de-3f78-4f14-a2b0-6f0a38d439c8)
+![FF205561-A6A6-40F3-B5CC-D0342D7242A1_1_201_a](https://github.com/user-attachments/assets/71c42cc9-3781-41f1-9d36-ce33ed86616a)
 
 
 ---
