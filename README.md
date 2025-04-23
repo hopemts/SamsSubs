@@ -15,7 +15,7 @@ Throughout the project, we:
 - Normalized a messy dataset and built a transactional database in SQL Server
 - Designed and implemented a dimensional model using the Kimball methodology
 - Loaded data into Snowflake using Fivetran and transformed it using dbt
-- Built Tableau dashboards with customer-specific visualizations and strategic recommendations
+- Built a web app with customer-specific insights and strategic recommendations
 
 ---
 
